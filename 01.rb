@@ -1,17 +1,7 @@
 module Day01
-  class LocationPair
-    attr_reader :first, :second
-    def initialize(first, second)
-      @first = first
-      @second = second
-    end
-
+  LocationPair = Data.define(:first, :second) do
     def distance
-      (@second - @first).abs
-    end
-
-    def ==(other)
-      @first == other.first && @second == other.second
+      (second - first).abs
     end
   end
 
@@ -32,7 +22,7 @@ module Day01
     end
 
     def total_distance
-      @pairs.sum(&:distance)
+      pairs.sum(&:distance)
     end
 
     def similarity_score
@@ -41,7 +31,7 @@ module Day01
     end
 
     def ==(other)
-      @pairs == other.pairs
+      pairs == other.pairs
     end
 
     private
