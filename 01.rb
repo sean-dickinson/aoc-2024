@@ -1,5 +1,4 @@
 module Day01
-
   class LocationPair
     attr_reader :first, :second
     def initialize(first, second)
@@ -27,11 +26,18 @@ module Day01
     attr_reader :pairs
 
     def initialize(left_list, right_list)
+      @left_list = left_list
+      @right_list = right_list
       @pairs = create_pairs(left_list, right_list)
     end
 
     def total_distance
       @pairs.sum(&:distance)
+    end
+
+    def similarity_score
+      right_tally = @right_list.tally
+      @left_list.sum { |location| location * right_tally.fetch(location, 0) }
     end
 
     def ==(other)
@@ -43,10 +49,9 @@ module Day01
     # @param left_list [Array<Integer>]
     # @param right_list [Array<Integer>]
     def create_pairs(left_list, right_list)
-      left_list.sort.zip(right_list.sort).map {|pair| LocationPair.new(*pair)}
+      left_list.sort.zip(right_list.sort).map { |pair| LocationPair.new(*pair) }
     end
   end
-
 
   class << self
     def part_one(input)
@@ -54,7 +59,7 @@ module Day01
     end
 
     def part_two(input)
-      raise NotImplementedError
+      LocationPairList.from_input(input).similarity_score
     end
   end
 end
