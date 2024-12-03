@@ -37,7 +37,6 @@ RSpec.describe Day02 do
   end
   context "part 1" do
     it "returns the correct answer for the example input" do
-      pending
       input = File.readlines("spec/test_inputs/02.txt", chomp: true)
       expect(Day02.part_one(input)).to eq 2
     end
