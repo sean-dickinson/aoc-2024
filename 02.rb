@@ -7,6 +7,7 @@ module Day02
     end
 
     attr_reader :levels
+
     def initialize(*levels)
       @levels = levels
     end
@@ -37,13 +38,36 @@ module Day02
       3
     end
   end
+
+  class ProblemDampenedReport < Report
+    def safe?
+      if super
+        true
+      else
+        reports_with_level_removed.any?(&:safe?)
+      end
+    end
+
+    private
+
+    def reports_with_level_removed
+      levels.map.with_index { |_level, index| report_without_level(index) }
+    end
+
+    def report_without_level(index_to_remove)
+      modified_levels = [*levels]
+      modified_levels.delete_at(index_to_remove)
+      Report.new(*modified_levels)
+    end
+  end
+
   class << self
     def part_one(input)
       input.map { |line| Report.from_string(line) }.count(&:safe?)
     end
 
     def part_two(input)
-      raise NotImplementedError
+      input.map { |line| ProblemDampenedReport.from_string(line) }.count(&:safe?)
     end
   end
 end
