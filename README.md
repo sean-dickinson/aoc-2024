@@ -2,7 +2,7 @@
 
 All solutions are in Ruby with tests in the spec folder.
 
-Many thanks to the [Ruby AOC CLI](https://github.com/egiurleo/advent_of_code_cli).
+Many thanks to the [Ruby AOC CLI](https://github.com/egiurleo/advent_of_code_cli)!
 
 ## Differences from the Ruby AOC CLI
 - Rather than an "examples" concept, I am generating rspec tests for each day. 
