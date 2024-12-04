@@ -36,9 +36,8 @@ RSpec.describe Day03 do
 
   context "part 2" do
     it "returns the correct answer for the example input" do
-      pending
-      input = File.readlines("spec/test_inputs/03.txt", chomp: true)
-      expect(Day03.part_two(input)).to eq 0 # TODO: replace with correct answer
+      input = ["xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"]
+      expect(Day03.part_two(input)).to eq 48
     end
   end
 end
