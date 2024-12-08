@@ -27,9 +27,27 @@ RSpec.describe Day04 do
       expect(cell.right).to eq Day04::GridCell.new(1, 2)
     end
 
-    it "can be moved up and left at the same time" do
+    it "can stay in place" do
+      cell = Day04::GridCell.new(1, 1)
+      expect(cell.stay).to eq Day04::GridCell.new(1, 1)
+    end
+
+    it "can be moved in multiple directions at once" do
       cell = Day04::GridCell.new(1, 1)
       expect(cell.up_left).to eq Day04::GridCell.new(0, 0)
+      expect(cell.up_right).to eq Day04::GridCell.new(0, 2)
+      expect(cell.right_right).to eq Day04::GridCell.new(1, 3)
+    end
+
+    context "relatives" do
+      it "takes a list of directions and returns the cells referenced by following those directions" do
+        cell = Day04::GridCell.new(1, 1)
+        expect(cell.relatives(:up, :right, :down)).to eq [
+          Day04::GridCell.new(0, 1),
+          Day04::GridCell.new(1, 2),
+          Day04::GridCell.new(2, 1)
+        ]
+      end
     end
   end
 

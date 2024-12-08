@@ -1,14 +1,6 @@
 require "debug"
 module Day04
   GridCell = Data.define(:row, :column) do
-    def to_s
-      "(#{row}, #{column})"
-    end
-
-    def inspect
-      to_s
-    end
-
     def up
       to(row - 1, column)
     end
@@ -29,6 +21,12 @@ module Day04
       to(row, column)
     end
 
+    def relatives(*directions)
+      directions.map do |direction|
+        public_send(direction)
+      end
+    end
+
     def respond_to_missing?(method_name, include_private = false)
       is_combination_method?(method_name) || super
     end
@@ -42,6 +40,14 @@ module Day04
       methods.reduce(self) do |cell, method|
         cell.public_send(method)
       end
+    end
+
+    def to_s
+      "(#{row}, #{column})"
+    end
+
+    def inspect
+      to_s
     end
 
     private
@@ -64,6 +70,8 @@ module Day04
       @grid = create_grid!(grid)
     end
 
+    # @param cells [Array<GridCell>]
+    # @return [Array<String>] the values of the grid cells, invalid cells will be returned as nil
     def at(*cells)
       cells.map do |cell|
         if out_of_bounds?(cell)
@@ -79,9 +87,8 @@ module Day04
     # or if a block is given, when the block returns a truthy value
     # The block takes precedence over the value
     def where(value = nil)
-      if !value.nil? && block_given?
-        raise ArgumentError, "You can't pass both a value and a block"
-      end
+      raise ArgumentError, "You can't pass both a value and a block" if !value.nil? && block_given?
+
       @grid.each_with_index.flat_map do |row, row_index|
         row.each_with_index.map do |cell, column_index|
           result = if block_given?
@@ -120,14 +127,26 @@ module Day04
   end
 
   class Pattern
+    # @abstract
+    # Check if the value given is the start of the pattern
+    # @param value [String]
+    # @return [Boolean]
     def start_with?(value)
       raise NotImplementedError, "Subclasses must implement this method"
     end
 
+    # @abstract
+    # Given a starting cell, return a list of cells that are candidates for the pattern
+    # @param cell [GridCell]
+    # @return [Array<Array<GridCell>>]
     def candidates_for(cell)
       raise NotImplementedError, "Subclasses must implement this method"
     end
 
+    # @abstract
+    # Check if the values given match the pattern
+    # @param values [Array<String | nil>]
+    # @return [Boolean]
     def match?(values)
       raise NotImplementedError, "Subclasses must implement this method"
     end
@@ -142,12 +161,9 @@ module Day04
       value == @word[0]
     end
 
-    # @param cell [GridCell]
     def candidates_for(cell)
       search_directions.map do |direction|
-        directions_for_word(direction).map do |method|
-          cell.public_send(method)
-        end
+        cell.relatives(*direction_list_for(direction))
       end
     end
 
@@ -157,7 +173,10 @@ module Day04
 
     private
 
-    def directions_for_word(direction)
+    # We want to search linearly in a direction,
+    # This method returns the directions to give to the starting cell,
+    # to get all the cells in the direction we want to search
+    def direction_list_for(direction)
       [:stay, *relatives(direction)]
     end
 
@@ -187,7 +206,7 @@ module Day04
     end
 
     def candidates_for(cell)
-      [cells_from_relative_directions(cell, directions)]
+      [cell.relatives(*directions)]
     end
 
     def match?(values)
@@ -215,12 +234,6 @@ module Day04
 
     def diagonal_down_left
       [:up_right, :stay, :down_left]
-    end
-
-    def cells_from_relative_directions(cell, directions)
-      directions.map do |direction|
-        cell.public_send(direction)
-      end
     end
   end
 
