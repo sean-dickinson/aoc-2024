@@ -1,4 +1,3 @@
-require "debug"
 module Day04
   GridCell = Data.define(:row, :column) do
     def up
