@@ -36,13 +36,11 @@ module Day04
     # We accept methods that are a combination of existing methods separated by an underscore
     # For example, `up_right` is a valid method name
     def method_missing(method_name, *args, &block)
-      if is_combination_method?(method_name)
-        *methods = method_name.to_s.split("_")
-        methods.reduce(self) do |cell, method|
-          cell.public_send(method)
-        end
-      else
-        super
+      return super unless is_combination_method?(method_name)
+
+      *methods = method_name.to_s.split("_")
+      methods.reduce(self) do |cell, method|
+        cell.public_send(method)
       end
     end
 
