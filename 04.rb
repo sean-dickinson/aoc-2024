@@ -144,8 +144,10 @@ module Day04
 
     # @param cell [GridCell]
     def candidates_for(cell)
-      directions.map do |direction|
-        follow_directions(cell, directions_for_word(direction))
+      search_directions.map do |direction|
+        directions_for_word(direction).map do |method|
+          cell.public_send(method)
+        end
       end
     end
 
@@ -155,26 +157,11 @@ module Day04
 
     private
 
-    # @param cell [GridCell]
-    # @param cell_methods [Array<Symbol>]
-    # @return [Array<GridCell>]
-    def follow_directions(cell, cell_methods)
-      results = []
-      current_cell = cell
-      cell_methods.each do |method|
-        current_cell = current_cell.public_send(method)
-        results << current_cell
-      end
-      results
-    end
-
-    # @param direction [Symbol]
-    # @return [Array<Symbol>]
     def directions_for_word(direction)
-      [:stay, *Array.new(@word.size - 1).fill(direction)]
+      [:stay, *relatives(direction)]
     end
 
-    def directions
+    def search_directions
       [
         :right,
         :left,
@@ -185,6 +172,12 @@ module Day04
         :up_left,
         :down_left
       ]
+    end
+
+    def relatives(direction)
+      1.upto(@word.size - 1).map do |i|
+        ([direction] * i).join("_")
+      end
     end
   end
 
