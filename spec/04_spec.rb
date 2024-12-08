@@ -97,7 +97,7 @@ RSpec.describe Day04 do
     end
   end
 
-  describe "XMASPattern" do
+  describe "WordPattern" do
     context "#candidates_for" do
       let(:pattern) { Day04::WordPattern.new("XMAS") }
       it "generates the correct candidates to the right" do
@@ -182,6 +182,63 @@ RSpec.describe Day04 do
     end
   end
 
+  describe "XMasPattern" do
+    context "#candidates_for" do
+      it "returns the correct candidates for a cell" do
+        cell = Day04::GridCell.new(1, 1)
+        pattern = Day04::XMasPattern.new
+        expect(pattern.candidates_for(cell)).to eq [
+          [
+            Day04::GridCell.new(0, 0),
+            Day04::GridCell.new(1, 1),
+            Day04::GridCell.new(2, 2),
+            Day04::GridCell.new(0, 2),
+            Day04::GridCell.new(1, 1),
+            Day04::GridCell.new(2, 0)
+          ]
+        ]
+      end
+    end
+
+    context "#match?" do
+      it "returns true if the MAS starts at the top right and top left" do
+        pattern = Day04::XMasPattern.new
+        # represents the following grid:
+        # M X M
+        # X A X
+        # S X S
+        expect(pattern.match?(["M", "A", "S", "M", "A", "S"])).to be true
+      end
+
+      it "returns true if the MAS starts at the bottom right and bottom left" do
+        pattern = Day04::XMasPattern.new
+        # represents the following grid:
+        # S X S
+        # X A X
+        # M X M
+        expect(pattern.match?(["S", "A", "M", "S", "A", "M"])).to be true
+      end
+
+      it "returns true if the MAS starts at the top right and bottom right" do
+        pattern = Day04::XMasPattern.new
+        # represents the following grid:
+        # S X M
+        # X A X
+        # S X M
+        expect(pattern.match?(["S", "A", "M", "M", "A", "S"])).to be true
+      end
+
+      it "returns true if the MAS starts at the top left and bottom left" do
+        pattern = Day04::XMasPattern.new
+        # represents the following grid:
+        # M X S
+        # X A X
+        # M X S
+        expect(pattern.match?(["M", "A", "S", "S", "A", "M"])).to be true
+      end
+    end
+  end
+
   describe "WordSearch" do
     it "can be initialized with a grid and a word" do
       grid = Day04::Grid.new([
@@ -215,9 +272,8 @@ RSpec.describe Day04 do
 
   context "part 2" do
     it "returns the correct answer for the example input" do
-      pending
       input = File.readlines("spec/test_inputs/04.txt", chomp: true)
-      expect(Day04.part_two(input)).to eq 0 # TODO: replace with correct answer
+      expect(Day04.part_two(input)).to eq 9
     end
   end
 end

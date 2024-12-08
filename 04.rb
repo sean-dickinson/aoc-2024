@@ -1,6 +1,14 @@
 require "debug"
 module Day04
   GridCell = Data.define(:row, :column) do
+    def to_s
+      "(#{row}, #{column})"
+    end
+
+    def inspect
+      to_s
+    end
+
     def up
       to(row - 1, column)
     end
@@ -25,6 +33,8 @@ module Day04
       is_combination_method?(method_name) || super
     end
 
+    # We accept methods that are a combination of existing methods separated by an underscore
+    # For example, `up_right` is a valid method name
     def method_missing(method_name, *args, &block)
       if is_combination_method?(method_name)
         *methods = method_name.to_s.split("_")
@@ -38,7 +48,9 @@ module Day04
 
     private
 
+    # Check if the method name is a combination of existing methods separated by an underscore
     def is_combination_method?(method_name)
+      return false unless method_name.to_s.include?("_")
       method_name.to_s.split("_").all? { |m| respond_to?(m) }
     end
 
@@ -64,7 +76,14 @@ module Day04
       end
     end
 
+    # Accept either a value or a block,
+    # returns all the grid cells that match the value
+    # or if a block is given, when the block returns a truthy value
+    # The block takes precedence over the value
     def where(value = nil)
+      if !value.nil? && block_given?
+        raise ArgumentError, "You can't pass both a value and a block"
+      end
       @grid.each_with_index.flat_map do |row, row_index|
         row.each_with_index.map do |cell, column_index|
           result = if block_given?
@@ -171,6 +190,49 @@ module Day04
     end
   end
 
+  class XMasPattern < Pattern
+    def start_with?(value)
+      value == "A"
+    end
+
+    def candidates_for(cell)
+      [cells_from_relative_directions(cell, directions)]
+    end
+
+    def match?(values)
+      matching_values.include?(values.compact.join)
+    end
+
+    private
+
+    def matching_values
+      [
+        "MAS" * 2,
+        "MAS".reverse * 2,
+        "MAS" + "MAS".reverse,
+        "MAS".reverse + "MAS"
+      ]
+    end
+
+    def directions
+      diagonal_down_right + diagonal_down_left
+    end
+
+    def diagonal_down_right
+      [:up_left, :stay, :down_right]
+    end
+
+    def diagonal_down_left
+      [:up_right, :stay, :down_left]
+    end
+
+    def cells_from_relative_directions(cell, directions)
+      directions.map do |direction|
+        cell.public_send(direction)
+      end
+    end
+  end
+
   class WordSearch
     def initialize(grid, pattern)
       @grid = grid
@@ -202,7 +264,9 @@ module Day04
     end
 
     def part_two(input)
-      raise NotImplementedError
+      grid = Grid.new(input)
+      search = WordSearch.new(grid, XMasPattern.new)
+      search.count
     end
   end
 end
