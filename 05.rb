@@ -1,6 +1,9 @@
+require "forwardable"
 module Day05
   class Update
     attr_reader :pages
+    extend Forwardable
+    def_delegators :@pages, :eql?, :find_index
     # @param string [String]
     def initialize(string)
       @pages = string.split(",").map(&:to_i)
@@ -13,7 +16,7 @@ module Day05
     private
 
     def middle_index
-      (@pages.size / 2).ceil
+      (pages.size / 2).ceil
     end
   end
 
@@ -26,11 +29,30 @@ module Day05
     # @param update [Update]
     # @return [Boolean]
     def valid?(update)
-      before_index = update.pages.find_index(@before)
-      after_index = update.pages.find_index(@after)
+      before_index, after_index = indicies(update)
       return true if before_index.nil? || after_index.nil?
 
       before_index < after_index
+    end
+
+    # @param update [Update]
+    # @return [Update]
+    def correct(update)
+      return update if valid?(update)
+
+      before_index, after_index = indicies(update)
+      Update.new(swap(update.pages, before_index, after_index).join(","))
+    end
+
+    private
+
+    def swap(pages, before_index, after_index)
+      pages[before_index], pages[after_index] = pages[after_index], pages[before_index]
+      pages
+    end
+
+    def indicies(update)
+      [update.find_index(@before), update.find_index(@after)]
     end
   end
 
@@ -69,7 +91,27 @@ module Day05
         @rules.all? { |rule| rule.valid?(update) }
       end
     end
+
+    def corrected_updates
+      invalid_updates.map do |update|
+        corrected_update = correct_update(update) until @rules.all? { |rule| rule.valid?(update) }
+        corrected_update
+      end
+    end
+
+    private
+
+    def correct_update(update)
+      @rules.inject(update) do |corrected_update, rule|
+        rule.correct(corrected_update)
+      end
+    end
+
+    def invalid_updates
+      @updates - valid_updates
+    end
   end
+
   class << self
     def part_one(input)
       validator = Validator.from_input(input)
@@ -77,7 +119,8 @@ module Day05
     end
 
     def part_two(input)
-      raise NotImplementedError
+      validator = Validator.from_input(input)
+      validator.corrected_updates.sum(&:middle)
     end
   end
 end

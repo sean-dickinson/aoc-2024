@@ -31,6 +31,24 @@ RSpec.describe Day05 do
         expect(rule.valid?(update)).to eq false
       end
     end
+
+    describe "#correct" do
+      it "returns a new update correcting the order of the pages" do
+        update = Day05::Update.new("61,13,29")
+        rule = Day05::Rule.new("29|13")
+        corrected_update = rule.correct(update)
+        expect(corrected_update).not_to be update
+        expect(corrected_update.pages).to eq [61, 29, 13]
+        expect(rule.valid?(corrected_update)).to be true
+      end
+
+      it "returns the same update if the rule is valid" do
+        update = Day05::Update.new("61,13,29")
+        rule = Day05::Rule.new("61|13")
+        corrected_update = rule.correct(update)
+        expect(corrected_update).to be update
+      end
+    end
   end
 
   describe "Update" do
@@ -82,6 +100,27 @@ RSpec.describe Day05 do
       end
     end
 
+    describe "#corrected_updates" do
+      it "returns the corrected versions of invalid updates" do
+        rules = [
+          Day05::Rule.new("75|47"),
+          Day05::Rule.new("75|61"),
+          Day05::Rule.new("75|53"),
+          Day05::Rule.new("75|29"),
+          Day05::Rule.new("97|75") # makes 2nd update invalid
+        ]
+        updates = [
+          Day05::Update.new("75,47,61,53,29"),
+          Day05::Update.new("75,97,47,61,53")
+        ]
+        validator = Day05::Validator.new(rules, updates)
+
+        invalid_updates = validator.corrected_updates
+        expect(invalid_updates.size).to eq 1
+        expect(invalid_updates.first.pages).to eq [97, 75, 47, 61, 53]
+      end
+    end
+
     describe "self.from_input" do
       it "creates a validator from an array of strings" do
         input = [
@@ -116,9 +155,8 @@ RSpec.describe Day05 do
 
   context "part 2" do
     it "returns the correct answer for the example input" do
-      pending
       input = File.readlines("spec/test_inputs/05.txt", chomp: true)
-      expect(Day05.part_two(input)).to eq 0 # TODO: replace with correct answer
+      expect(Day05.part_two(input)).to eq 123
     end
   end
 end
