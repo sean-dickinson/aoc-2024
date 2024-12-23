@@ -2,6 +2,7 @@ require "forwardable"
 module Day05
   class Update
     attr_reader :pages
+
     extend Forwardable
     def_delegators :@pages, :eql?, :find_index
     # @param string [String]
@@ -33,6 +34,10 @@ module Day05
       return true if before_index.nil? || after_index.nil?
 
       before_index < after_index
+    end
+
+    def invalid?(update)
+      !valid?(update)
     end
 
     # @param update [Update]
@@ -78,6 +83,7 @@ module Day05
     end
 
     attr_reader :rules, :updates
+
     # @param rules [Array<Rule>]
     # @param updates [Array<Update>]
 
