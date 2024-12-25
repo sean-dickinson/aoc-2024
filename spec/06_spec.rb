@@ -73,16 +73,30 @@ RSpec.describe Day06 do
     end
 
     context "#turn" do
-      it "rotates the guard 90 degrees to the right, by updating the heading" do
+      it "rotates the guard to the east if it is facing north" do
         pos = Day06::Position.new(1, 2)
         guard = Day06::Guard.new(pos, :north)
-
         guard.turn
         expect(guard.heading).to eq :east
+      end
+
+      it "rotates the guard to the south if it is facing east" do
+        pos = Day06::Position.new(1, 2)
+        guard = Day06::Guard.new(pos, :east)
         guard.turn
         expect(guard.heading).to eq :south
+      end
+
+      it "rotates the guard to the west if it is facing south" do
+        pos = Day06::Position.new(1, 2)
+        guard = Day06::Guard.new(pos, :south)
         guard.turn
         expect(guard.heading).to eq :west
+      end
+
+      it "rotates the guard to the north if it is facing west" do
+        pos = Day06::Position.new(1, 2)
+        guard = Day06::Guard.new(pos, :west)
         guard.turn
         expect(guard.heading).to eq :north
       end
@@ -147,16 +161,16 @@ RSpec.describe Day06 do
   end
 
   describe "Map" do
-    it "initializes with a set of bounds,  obstacles and a guard" do
+    it "initializes with a set of bounds,  obstacles and a guard_visit" do
       bounds = Day06::MapBounds.new(3, 3)
-      obstacles = [Day06::Position.new(0, 1)]
-      guard = Day06::Guard.new(Day06::Position.new(2, 2), :north)
-      map = Day06::Map.new(bounds:, obstacles:, guard:)
+      obstacles = Set.new([Day06::Position.new(0, 1)])
+      guard_visit = Day06::GuardVisit.new(Day06::Position.new(2, 2), :north)
+      map = Day06::Map.new(bounds:, obstacles:, guard_visit:)
 
       expect(map).to be_a Day06::Map
       expect(map.bounds).to eq bounds
       expect(map.obstacles).to eq obstacles
-      expect(map.guard).to eq guard
+      expect(map.initial_guard).to eq guard_visit
     end
 
     describe "#plot" do
@@ -166,13 +180,25 @@ RSpec.describe Day06 do
           "#..",
           "..^"
         ]).build
-        map.plot
-        expect(map.guard.position).to eq Day06::Position.new(2, 1)
-        expect(map.guard.heading).to eq :east
-        expect(map.guard.visited_positions).to eq [
+        guard = map.plot
+        expect(guard.position).to eq Day06::Position.new(2, 1)
+        expect(guard.heading).to eq :east
+        expect(guard.visited_positions).to eq [
           Day06::Position.new(2, 2),
           Day06::Position.new(2, 1)
         ]
+      end
+
+      it "marks the guard as stuck if it ends up in a loop" do
+        map = Day06::MapFactory.new([
+          ".#...",
+          "....#",
+          "#^...",
+          "...#."
+        ]).build
+        guard = map.plot
+
+        expect(guard).to be_stuck
       end
     end
   end
@@ -187,8 +213,36 @@ RSpec.describe Day06 do
       map = map_factory.build
 
       expect(map).to be_a Day06::Map
-      expect(map.obstacles).to eq [Day06::Position.new(2, 0), Day06::Position.new(0, 1)]
-      expect(map.guard.position).to eq Day06::Position.new(2, 2)
+      expect(map.obstacles).to eq Set.new([Day06::Position.new(2, 0), Day06::Position.new(0, 1)])
+      expect(map.initial_guard).to eq Day06::GuardVisit.new(Day06::Position.new(2, 2), :north)
+    end
+  end
+
+  describe "ScenarioRunner" do
+    it "is initialized with a map" do
+      map = Day06::MapFactory.new([
+        ".....",
+        "....#",
+        "#^...",
+        "...#."
+      ]).build
+      runner = Day06::ScenarioRunner.new(map)
+
+      expect(runner).to be_a Day06::ScenarioRunner
+    end
+
+    describe "#trap_positions" do
+      it "returns the number of positions where an obstacle could be placed to trap the guard in a loop" do
+        map = Day06::MapFactory.new([
+          ".....",
+          "....#",
+          "#^...",
+          "...#."
+        ]).build
+        runner = Day06::ScenarioRunner.new(map)
+
+        expect(runner.trap_positions).to eq 1
+      end
     end
   end
 
@@ -201,9 +255,8 @@ RSpec.describe Day06 do
 
   context "part 2" do
     it "returns the correct answer for the example input" do
-      pending
       input = File.readlines("spec/test_inputs/06.txt", chomp: true)
-      expect(Day06.part_two(input)).to eq 0 # TODO: replace with correct answer
+      expect(Day06.part_two(input)).to eq 6
     end
   end
 end
