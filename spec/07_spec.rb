@@ -1,5 +1,10 @@
 require "./07"
 RSpec.describe Day07 do
+  describe "Integer" do
+    it "can be concatenated with another integer" do
+      expect(1 | 2).to eq 12
+    end
+  end
   describe "Equation" do
     context "self.from_string" do
       it "can be created from a string" do
@@ -46,6 +51,19 @@ RSpec.describe Day07 do
         equation = Day07::Equation.new(solution: 38, terms: [5, 6, 7])
         expect(equation).not_to be_valid
       end
+
+      context "concatenation" do
+        it "is valid if the solution is the concatenation of the terms" do
+          equation = Day07::Equation.new(solution: 56, terms: [5, 6], additional_operators: [:|])
+          expect(equation).to be_valid
+        end
+
+        it "is valid if the concatenation can be applied with in addition to multiplication to make it true" do
+          equation = Day07::Equation.new(solution: 7290, terms: [6, 8, 6, 15], additional_operators: [:|])
+          # 6 * 8 | 6 * 15
+          expect(equation).to be_valid
+        end
+      end
     end
   end
 
@@ -58,9 +76,8 @@ RSpec.describe Day07 do
 
   context "part 2" do
     it "returns the correct answer for the example input" do
-      pending
       input = File.readlines("spec/test_inputs/07.txt", chomp: true)
-      expect(Day07.part_two(input)).to eq 0 # TODO: replace with correct answer
+      expect(Day07.part_two(input)).to eq 11387
     end
   end
 end

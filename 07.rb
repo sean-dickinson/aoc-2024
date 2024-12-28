@@ -1,16 +1,25 @@
+class Integer
+  # || is reserved in Ruby, so I'm using | instead to represent concatenation
+  def |(other)
+    "#{self}#{other}".to_i
+  end
+end
+
 module Day07
-  Equation = Data.define(:solution, :terms, :operators) do
+  Equation = Data.define(:solution, :terms, :additional_operators) do
     class << self
-      def from_string(input)
+      def from_string(input, additional_operators: [])
         solution, *terms = input.split(":")
         terms = terms.first.split.map(&:to_i)
-        new(solution: solution.to_i, terms: terms)
+        new(solution: solution.to_i, terms:, additional_operators:)
       end
     end
 
-    def initialize(solution:, terms:, operators: %i[+ *])
-      super(solution:, terms:, operators:)
+    def initialize(solution:, terms:, additional_operators: [])
+      super(solution:, terms:, additional_operators:)
     end
+
+    def operators = %i[+ *] + additional_operators
 
     def valid?
       operators.any? { |operator| operator_valid?(operator) }
@@ -39,7 +48,7 @@ module Day07
     end
 
     def part_two(input)
-      raise NotImplementedError
+      input.map { |line| Equation.from_string(line, additional_operators: [:|]) }.select(&:valid?).sum(&:solution)
     end
   end
 end
