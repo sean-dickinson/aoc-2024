@@ -1,11 +1,12 @@
-class Integer
-  # || is reserved in Ruby, so I'm using | instead to represent concatenation
-  def |(other)
-    "#{self}#{other}".to_i
-  end
-end
-
 module Day07
+  # Yeah, I'm re-opening the Integer class to add behavior to it.
+  class ::Integer
+    # || is reserved in Ruby, so I'm using | instead to represent concatenation
+    def |(other)
+      "#{self}#{other}".to_i
+    end
+  end
+
   Equation = Data.define(:solution, :terms, :additional_operators) do
     class << self
       def from_string(input, additional_operators: [])
@@ -15,6 +16,7 @@ module Day07
       end
     end
 
+    # Data is a bit funky, to apply defaults I need to override the #initialize method and supply the defaults there
     def initialize(solution:, terms:, additional_operators: [])
       super(solution:, terms:, additional_operators:)
     end
