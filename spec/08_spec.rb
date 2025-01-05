@@ -87,11 +87,57 @@ RSpec.describe Day08 do
     end
   end
 
+  describe "Line" do
+    it "is created with two positions" do
+      position1 = Day08::Position.new(0, 0)
+      position2 = Day08::Position.new(1, 1)
+      line = Day08::Line.new(position1, position2)
+      expect(line.position_1).to eq position1
+      expect(line.position_2).to eq position2
+      expect(line.slope).to eq 1
+    end
+
+    describe "#at" do
+      it "returns the position on the line at the given column" do
+        position1 = Day08::Position.new(0, 0)
+        position2 = Day08::Position.new(1, 1)
+        line = Day08::Line.new(position1, position2)
+
+        expect(line.at(2)).to eq Day08::Position.new(2, 2)
+        expect(line.at(3)).to eq Day08::Position.new(3, 3)
+        expect(line.at(0)).to eq Day08::Position.new(0, 0)
+        expect(line.at(-1)).to eq Day08::Position.new(-1, -1)
+      end
+    end
+  end
+
   describe "GridBounds" do
     it "is created with number of rows and columns" do
       bounds = Day08::GridBounds.new(3, 4)
       expect(bounds.rows).to eq 3
       expect(bounds.columns).to eq 4
+    end
+
+    describe "#in_line_with" do
+      it "returns the positions inside the bounds that are in a line between two positions" do
+        bounds = Day08::GridBounds.new(4, 4)
+        expect(bounds.in_line_with(Day08::Position.new(0, 0), Day08::Position.new(3, 3))).to contain_exactly(
+          Day08::Position.new(0, 0),
+          Day08::Position.new(1, 1),
+          Day08::Position.new(2, 2),
+          Day08::Position.new(3, 3)
+        )
+      end
+
+      it "returns the correct positions for the small example" do
+        bounds = Day08::GridBounds.new(10, 10)
+        expect(bounds.in_line_with(Day08::Position.new(0, 0), Day08::Position.new(1, 3))).to contain_exactly(
+          Day08::Position.new(0, 0),
+          Day08::Position.new(1, 3),
+          Day08::Position.new(2, 6),
+          Day08::Position.new(3, 9)
+        )
+      end
     end
     describe "#include?" do
       it "returns false if the position is not inside the bounds" do
@@ -179,9 +225,8 @@ RSpec.describe Day08 do
 
   context "part 2" do
     it "returns the correct answer for the example input" do
-      pending
       input = File.readlines("spec/test_inputs/08.txt", chomp: true)
-      expect(Day08.part_two(input)).to eq 0 # TODO: replace with correct answer
+      expect(Day08.part_two(input)).to eq 34
     end
   end
 end

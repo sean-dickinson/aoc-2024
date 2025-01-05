@@ -21,6 +21,24 @@ module Day08
     end
   end
 
+  Line = Data.define(:position_1, :position_2) do
+    def slope
+      delta = position_2 - position_1
+      Rational(delta.row, delta.column)
+    end
+
+    def at(column)
+      # Point slope form: y - y1 = m(x - x1)
+      row = (slope * (column - position_1.column)) + position_1.row
+      # We ignore values that are not integers since it doesn't fit the grid model
+      if row != row.to_i
+        nil
+      else
+        Position.new(row, column)
+      end
+    end
+  end
+
   GridBounds = Data.define(:rows, :columns) do
     def include?(position)
       [
@@ -29,6 +47,14 @@ module Day08
         position.row < rows,
         position.column < columns
       ].all?
+    end
+
+    def in_line_with(position1, position2)
+      line = Line.new(position1, position2)
+      (0...columns)
+        .map { |column| line.at(column) }
+        .compact
+        .select(&method(:include?))
     end
   end
 
@@ -46,7 +72,26 @@ module Day08
       end
     end
 
+    def resonant_harmonics
+      grouped_antennas.inject(Set.new) do |result, group|
+        result + harmonics_for_antennas(group)
+      end
+    end
+
     private
+
+    def harmonics_for_antennas(group)
+      group.combination(2).flat_map do |(antenna1, antenna2)|
+        bounds.in_line_with(antenna1.position, antenna2.position)
+      end
+    end
+
+    def grouped_antennas
+      antennas
+        .group_by(&:frequency)
+        .values
+        .reject { |group| group.size < 2 }
+    end
 
     def antinodes_for(antenna)
       antennas.inject([]) do |results, other|
@@ -97,7 +142,8 @@ module Day08
     end
 
     def part_two(input)
-      raise NotImplementedError
+      grid = GridFactory.new(input).grid
+      grid.resonant_harmonics.size
     end
   end
 end
