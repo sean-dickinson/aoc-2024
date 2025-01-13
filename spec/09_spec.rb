@@ -62,25 +62,28 @@ RSpec.describe Day09 do
       expect(map.to_s).to eq "0..111....22222"
     end
 
-    describe "compact!" do
-      it "correctly rearranges blocks for the 12345 example" do
-        factory = Day09::DiskMapFactory.new("12345")
-        map = factory.parse
-
-        map.compact!
-
-        expect(map.to_s).to eq "022111222......"
-      end
-    end
-
     it "calculates the checksum by summing the blocks position times their file id" do
       factory = Day09::DiskMapFactory.new("12345")
 
       map = factory.parse
-      map.compact!
+      compactor = Day09::DiskMapCompactor.new(map)
+      compactor.compact!
 
       # 022111222......
       expect(map.checksum).to eq (0 * 0) + (1 * 2) + (2 * 2) + (3 * 1) + (4 * 1) + (5 * 1) + (6 * 2) + (7 * 2) + (8 * 2)
+    end
+  end
+
+  describe "DiskMapCompactor" do
+    describe "compact!" do
+      it "correctly rearranges blocks for the 12345 example" do
+        factory = Day09::DiskMapFactory.new("12345")
+        map = factory.parse
+        compactor = Day09::DiskMapCompactor.new(map)
+        compactor.compact!
+
+        expect(map.to_s).to eq "022111222......"
+      end
     end
   end
 

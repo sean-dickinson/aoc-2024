@@ -53,18 +53,8 @@ module Day09
 
   class DiskMap
     attr_reader :blocks
-
     def initialize(blocks)
       @blocks = blocks
-      @left_pointer = leftmost_empty_position(0)
-      @right_pointer = rightmost_file_block(blocks.size)
-    end
-
-    def compact!
-      until invalid_pointers?
-        move_blocks!
-        reset_pointers!
-      end
     end
 
     def checksum
@@ -76,8 +66,27 @@ module Day09
     def to_s
       blocks.map(&:to_s).join
     end
+  end
+
+  class DiskMapCompactor
+    def initialize(map)
+      @map = map
+      @left_pointer = leftmost_empty_position(0)
+      @right_pointer = rightmost_file_block(blocks.size)
+    end
+
+    def compact!
+      until invalid_pointers?
+        move_blocks!
+        reset_pointers!
+      end
+    end
 
     private
+
+    def blocks
+      @map.blocks
+    end
 
     def invalid_pointers?
       [
@@ -88,7 +97,7 @@ module Day09
     end
 
     def move_blocks!
-      @blocks[@left_pointer], @blocks[@right_pointer] = @blocks[@right_pointer], @blocks[@left_pointer]
+      blocks[@left_pointer], blocks[@right_pointer] = blocks[@right_pointer], blocks[@left_pointer]
     end
 
     def reset_pointers!
@@ -116,8 +125,9 @@ module Day09
     def part_one(input)
       factory = DiskMapFactory.new(input.first)
       map = factory.parse
+      compactor = DiskMapCompactor.new(map)
 
-      map.compact!
+      compactor.compact!
 
       map.checksum
     end
