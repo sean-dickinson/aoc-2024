@@ -87,6 +87,23 @@ RSpec.describe Day09 do
     end
   end
 
+  describe "DiskMapDefragmenter" do
+    it "defragments a simple map" do
+      map = Day09::DiskMap.new([
+        Day09::Block.new(0),
+        Day09::Block.new(nil),
+        Day09::Block.new(nil),
+        Day09::Block.new(1),
+        Day09::Block.new(1)
+      ])
+
+      defragmenter = Day09::DiskMapDefragmenter.new(map)
+      defragmenter.defragment!
+
+      expect(map.to_s).to eq "011.."
+    end
+  end
+
   context "part 1" do
     it "returns the correct answer for the example input" do
       input = File.readlines("spec/test_inputs/09.txt", chomp: true)
@@ -96,9 +113,8 @@ RSpec.describe Day09 do
 
   context "part 2" do
     it "returns the correct answer for the example input" do
-      pending
       input = File.readlines("spec/test_inputs/09.txt", chomp: true)
-      expect(Day09.part_two(input)).to eq 0 # TODO: replace with correct answer
+      expect(Day09.part_two(input)).to eq 2858
     end
   end
 end
