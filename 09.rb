@@ -1,11 +1,7 @@
 module Day09
-  Block = Data.define(:file) do
-    def file_id
-      file&.id
-    end
-
+  Block = Data.define(:file_id) do
     def empty?
-      file.nil?
+      file_id.nil?
     end
 
     def to_s
@@ -16,18 +12,17 @@ module Day09
       end
     end
   end
-  File = Data.define(:id)
 
   class DiskMapFactory
     def initialize(input)
       @input = input
-      @files = []
+      @file_id = 0
       @blocks = []
     end
 
     def parse
       process_input!
-      DiskMap.new(files: @files, blocks: @blocks)
+      DiskMap.new(@blocks)
     end
 
     private
@@ -35,17 +30,12 @@ module Day09
     def process_input!
       @input.chars.map(&:to_i).each_with_index do |number, index|
         if index.even?
-          create_file
-          create_file_blocks(@files.last, number)
+          create_file_blocks(@file_id, number)
+          @file_id += 1
         else
           create_empty_blocks(number)
         end
       end
-    end
-
-    def create_file
-      file_id = @files.size
-      @files << File.new(file_id)
     end
 
     def create_empty_blocks(num_blocks)
@@ -54,18 +44,17 @@ module Day09
       end
     end
 
-    def create_file_blocks(file, num_blocks)
+    def create_file_blocks(file_id, num_blocks)
       num_blocks.times do
-        @blocks << Block.new(file)
+        @blocks << Block.new(file_id)
       end
     end
   end
 
   class DiskMap
-    attr_reader :files, :blocks
+    attr_reader :blocks
 
-    def initialize(files:, blocks:)
-      @files = files
+    def initialize(blocks)
       @blocks = blocks
       @left_pointer = leftmost_empty_position(0)
       @right_pointer = rightmost_file_block(blocks.size)

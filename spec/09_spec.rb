@@ -4,24 +4,14 @@ RSpec.describe Day09 do
     it "can be empty" do
       block = Day09::Block.new(nil)
       expect(block).to be_a(Day09::Block)
-      expect(block.file).to be_nil
+      expect(block.file_id).to be_nil
       expect(block).to be_empty
     end
 
-    it "can be associated with a file" do
-      file = Day09::File.new(2)
-      block = Day09::Block.new(file)
+    it "can have a file_id" do
+      block = Day09::Block.new(2)
       expect(block).to be_a(Day09::Block)
-      expect(block.file).to eq file
       expect(block.file_id).to eq 2
-    end
-  end
-
-  describe Day09::File do
-    it "is created with an id" do
-      file = Day09::File.new(1)
-      expect(file).to be_a(Day09::File)
-      expect(file.id).to eq 1
     end
   end
 
@@ -30,43 +20,37 @@ RSpec.describe Day09 do
       factory = Day09::DiskMapFactory.new("111")
       map = factory.parse
       expect(map).to be_a(Day09::DiskMap)
-      expect(map.files).to have(2).items
-
-      file_1, file_2 = map.files
-
       expect(map.blocks).to contain_exactly(
-        Day09::Block.new(file_1),
+        Day09::Block.new(0),
         Day09::Block.new(nil),
-        Day09::Block.new(file_2)
+        Day09::Block.new(1)
       )
     end
 
     it "creates the correct diskmap from 12345" do
-      files = [Day09::File.new(0), Day09::File.new(1), Day09::File.new(2)]
-      blocks = [
-        Day09::Block.new(files.first),
+      expected_blocks = [
+        Day09::Block.new(0),
         Day09::Block.new(nil),
         Day09::Block.new(nil),
-        Day09::Block.new(files.at(1)),
-        Day09::Block.new(files.at(1)),
-        Day09::Block.new(files.at(1)),
+        Day09::Block.new(1),
+        Day09::Block.new(1),
+        Day09::Block.new(1),
         Day09::Block.new(nil),
         Day09::Block.new(nil),
         Day09::Block.new(nil),
         Day09::Block.new(nil),
-        Day09::Block.new(files.last),
-        Day09::Block.new(files.last),
-        Day09::Block.new(files.last),
-        Day09::Block.new(files.last),
-        Day09::Block.new(files.last)
+        Day09::Block.new(2),
+        Day09::Block.new(2),
+        Day09::Block.new(2),
+        Day09::Block.new(2),
+        Day09::Block.new(2)
       ]
 
       factory = Day09::DiskMapFactory.new("12345")
       map = factory.parse
 
       expect(map).to be_a(Day09::DiskMap)
-      expect(map.files).to contain_exactly(*files)
-      expect(map.blocks).to contain_exactly(*blocks)
+      expect(map.blocks).to contain_exactly(*expected_blocks)
     end
   end
 
