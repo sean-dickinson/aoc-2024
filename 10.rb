@@ -80,6 +80,12 @@ module Day10
 
     def trailhead_scores
       trailheads.map do |trailhead|
+        peaks_from(trailhead).uniq.size
+      end
+    end
+
+    def trailhead_ratings
+      trailheads.map do |trailhead|
         peaks_from(trailhead).size
       end
     end
@@ -97,7 +103,7 @@ module Day10
         if current_position.hikeable?(neighbor)
           peaks_from(neighbor)
         end
-      end.flatten.compact.uniq
+      end.flatten.compact
     end
 
     def neighbors_for(position)
@@ -112,7 +118,8 @@ module Day10
     end
 
     def part_two(input)
-      raise NotImplementedError
+      map = MapFactory.new(input).create!
+      map.trailhead_ratings.sum
     end
   end
 end

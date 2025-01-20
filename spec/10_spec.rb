@@ -1,5 +1,4 @@
 require "./10"
-require "debug"
 RSpec.describe Day10 do
   describe Day10::Position do
     describe "#hikeable?" do
@@ -124,6 +123,54 @@ RSpec.describe Day10 do
         expect(map.trailhead_scores).to contain_exactly(1, 2)
       end
     end
+
+    describe "#trailhead_ratings" do
+      it "returns 3 if the trailhead has 3 distinct trails" do
+        input = %w[
+          .....0.
+          ..4321.
+          ..5..2.
+          ..6543.
+          ..7..4.
+          ..8765.
+          ..9....
+        ]
+
+        map = Day10::MapFactory.new(input).create!
+
+        expect(map.trailhead_ratings).to eq [3]
+      end
+
+      it "returns 13 if the trailhead has 13 distinct trails" do
+        input = %w[
+          ..90..9
+          ...1.98
+          ...2..7
+          6543456
+          765.987
+          876....
+          987....
+        ]
+
+        map = Day10::MapFactory.new(input).create!
+
+        expect(map.trailhead_ratings).to eq [13]
+      end
+
+      it "returns 227 when the trailhead has 121 trails to one peak and 106 to another peak" do
+        input = %w[
+          012345
+          123456
+          234567
+          345678
+          4.6789
+          56789.
+        ]
+        map = Day10::MapFactory.new(input).create!
+
+        expect(map.trailhead_ratings).to eq [227]
+      end
+    end
   end
 
   context "part 1" do
@@ -135,9 +182,8 @@ RSpec.describe Day10 do
 
   context "part 2" do
     it "returns the correct answer for the example input" do
-      pending
       input = File.readlines("spec/test_inputs/10.txt", chomp: true)
-      expect(Day10.part_two(input)).to eq 0 # TODO: replace with correct answer
+      expect(Day10.part_two(input)).to eq 81
     end
   end
 end
