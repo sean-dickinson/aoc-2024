@@ -1,16 +1,45 @@
+require "forwardable"
 module Day11
-  Stone = Data.define(:number) do
-    def blink
-      return with(number: 1) if number.zero?
+  StoneCollection = Data.define(:stones) do
+    extend Forwardable
 
-      if digit_count.even?
-        split_number.map { |num| with(number: num) }
-      else
-        with(number: number * 2024)
-      end
+    def_delegators :stones, :size
+
+    def +(other)
+      with(stones: stones + other.stones)
+    end
+
+    def blink
+      return blink_one if one?
+
+      stones.each_slice(size / 2).map do |some_stones|
+        with(stones: some_stones).blink
+      end.inject(:+)
     end
 
     private
+
+    def from(s)
+      with(stones: s)
+    end
+
+    def blink_one
+      return with(stones: [1]) if number.zero?
+
+      if digit_count.even?
+        with(stones: split_number)
+      else
+        with(stones: [number * 2024])
+      end
+    end
+
+    def number
+      stones.first
+    end
+
+    def one?
+      size == 1
+    end
 
     def digit_count
       number.to_s.size
@@ -27,7 +56,7 @@ module Day11
     end
 
     def create!
-      @input.split.map { |number| Stone.new(number.to_i) }
+      StoneCollection.new(@input.split.map(&:to_i))
     end
   end
 
@@ -35,7 +64,7 @@ module Day11
     def part_one(input)
       stones = StoneFactory.new(input.first).create!
       25.times do
-        stones = stones.flat_map(&:blink)
+        stones = stones.blink
       end
       stones.size
     end

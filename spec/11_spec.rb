@@ -1,32 +1,51 @@
 require "./11"
 RSpec.describe Day11 do
-  describe Day11::Stone do
-    it "has a number" do
-      stone = Day11::Stone.new(1)
-      expect(stone.number).to eq 1
+  describe Day11::StoneCollection do
+    describe "#size" do
+      it "returns the number of stones" do
+        stones = Day11::StoneCollection.new([1, 2, 3])
+        expect(stones.size).to eq 3
+      end
     end
 
-    context "#blink" do
-      it "is replaced by a stone with number 1 if it has a number 0" do
-        stone = Day11::Stone.new(0)
-        expect(stone.blink).to eq Day11::Stone.new(1)
+    describe "#+" do
+      it "can be added to another stone collection" do
+        stones = Day11::StoneCollection.new([1, 2, 3])
+        other_stones = Day11::StoneCollection.new([4, 5])
+        expect(stones + other_stones).to eq Day11::StoneCollection.new([1, 2, 3, 4, 5])
       end
+    end
 
-      context "even digits" do
-        it "becomes 2 stones with the digits split between them" do
-          stone = Day11::Stone.new(12)
-          expect(stone.blink).to eq [Day11::Stone.new(1), Day11::Stone.new(2)]
+    describe "#blink" do
+      context "single stone" do
+        it "is returns by a stone with number 1 if it has a number 0" do
+          stone = Day11::StoneCollection.new([0])
+          expect(stone.blink).to eq Day11::StoneCollection.new([1])
         end
 
-        it "ignores leading zeros" do
-          stone = Day11::Stone.new(1000)
-          expect(stone.blink).to eq [Day11::Stone.new(10), Day11::Stone.new(0)]
+        context "even digits" do
+          it "becomes 2 stones with the digits split between them" do
+            stone = Day11::StoneCollection.new([12])
+            expect(stone.blink).to eq Day11::StoneCollection.new([1, 2])
+          end
+
+          it "ignores leading zeros" do
+            stone = Day11::StoneCollection.new([1000])
+            expect(stone.blink).to eq Day11::StoneCollection.new([10, 0])
+          end
+        end
+
+        it "is replaced by a stone with its number multiplied by 2024 if neither rule applies" do
+          stone = Day11::StoneCollection.new([3])
+          expect(stone.blink).to eq Day11::StoneCollection.new([3 * 2024])
         end
       end
 
-      it "is replaced by a stone with its number multiplied by 2024 if neither rule applies" do
-        stone = Day11::Stone.new(3)
-        expect(stone.blink).to eq Day11::Stone.new(3 * 2024)
+      context "multiple stones" do
+        it "blinks each stone" do
+          stones = Day11::StoneCollection.new([1, 2])
+          expect(stones.blink).to eq Day11::StoneCollection.new([1]).blink + Day11::StoneCollection.new([2]).blink
+        end
       end
     end
   end
@@ -35,56 +54,26 @@ RSpec.describe Day11 do
     it "parses a list of stones from an string" do
       stone_factory = Day11::StoneFactory.new("0 1 10 99 999")
       stones = stone_factory.create!
-      expect(stones).to eq [
-                             Day11::Stone.new(0),
-                             Day11::Stone.new(1),
-                             Day11::Stone.new(10),
-                             Day11::Stone.new(99),
-                             Day11::Stone.new(999)
-                           ]
+      expect(stones).to eq Day11::StoneCollection.new([0, 1, 10, 99, 999])
     end
   end
 
   context "examples" do
     it "returns the correct answer for the first blink" do
-      stones = [Day11::Stone.new(125), Day11::Stone.new(17)]
-      expect(stones.flat_map(&:blink)).to eq [
-                                               Day11::Stone.new(253000),
-                                               Day11::Stone.new(1),
-                                               Day11::Stone.new(7)
-                                             ]
+      stones = Day11::StoneCollection.new([125, 17])
+      expect(stones.blink).to eq Day11::StoneCollection.new([253000, 1, 7])
     end
 
     it "returns the correct answer for the second blink" do
-      stones = [
-        Day11::Stone.new(253000),
-        Day11::Stone.new(1),
-        Day11::Stone.new(7)
-      ]
+      stones = Day11::StoneCollection.new([253000, 1, 7])
 
-      expect(stones.flat_map(&:blink)).to eq [
-                                               Day11::Stone.new(253),
-                                               Day11::Stone.new(0),
-                                               Day11::Stone.new(2024),
-                                               Day11::Stone.new(14168)
-                                             ]
+      expect(stones.blink).to eq Day11::StoneCollection.new([253, 0, 2024, 14168])
     end
 
     it "returns the correct answer for the 3rd blink" do
-      stones = [
-        Day11::Stone.new(253),
-        Day11::Stone.new(0),
-        Day11::Stone.new(2024),
-        Day11::Stone.new(14168)
-      ]
+      stones = Day11::StoneCollection.new([253, 0, 2024, 14168])
 
-      expect(stones.flat_map(&:blink)).to eq [
-                                                Day11::Stone.new(512072),
-                                                Day11::Stone.new(1),
-                                                Day11::Stone.new(20),
-                                                Day11::Stone.new(24),
-                                                Day11::Stone.new(28676032)
-                                             ]
+      expect(stones.blink).to eq Day11::StoneCollection.new([512072, 1, 20, 24, 28676032])
     end
   end
 
