@@ -21,10 +21,16 @@ module Day11
       end
     end
 
-    def blink(iterations = 1)
+    def blink
       stones.map do |stone|
-        stone.blink(iterations)
+        stone.blink
       end.inject(:+)
+    end
+
+    def blink_count(iterations = 1)
+      stones.sum do |stone|
+        stone.blink_count(iterations)
+      end
     end
   end
 
@@ -32,25 +38,37 @@ module Day11
     @cache = {}
 
     class << self
-      def get_closet_iteration_for(stone, iteration)
-        @cache[stone] ||= [stone.blink]
-        iteration_index = iteration - 1
-        value = @cache[stone][iteration_index]
-        return [iteration, value] unless value.nil?
-
-        @cache[stone] << @cache[stone].last.blink
-        highest_iteration_for(stone)
+      def fetch(stone, iteration, &block)
+        @cache[cache_key(stone, iteration)] ||= block.call
       end
 
       private
 
-      def highest_iteration_for(stone)
-        [
-          @cache[stone].size,
-          @cache[stone].last
-        ]
+      def cache_key(stone, iteration)
+        [stone.number, iteration]
       end
     end
+    def blink
+      return with(number: 1) if number.zero?
+
+      if digit_count.even?
+        StoneCollection.from_numbers(split_number)
+      else
+        with(number: number * 2024)
+      end
+    end
+
+    def blink_count(iterations = 1)
+      self.class.fetch(self, iterations) do
+        if iterations == 1
+          blink.size
+        else
+          blink.blink_count(iterations - 1)
+        end
+      end
+    end
+
+    def size = 1
 
     def +(other)
       if other.is_a? Stone
@@ -62,31 +80,7 @@ module Day11
       end
     end
 
-    def blink(iterations = 1)
-      return base_blink if iterations == 1
-      iteration, value = get_closest_iteration_to(iterations)
-      if iteration == iterations
-        value
-      else
-        value.blink(iterations - iteration)
-      end
-    end
-
     private
-
-    def get_closest_iteration_to(iteration)
-      self.class.get_closet_iteration_for(self, iteration)
-    end
-
-    def base_blink
-      return with(number: 1) if number.zero?
-
-      if digit_count.even?
-        StoneCollection.from_numbers(split_number)
-      else
-        with(number: number * 2024)
-      end
-    end
 
     def digit_count
       number.to_s.size
@@ -110,12 +104,12 @@ module Day11
   class << self
     def part_one(input)
       stones = StoneFactory.new(input.first).create!
-      stones.blink(25).size
+      stones.blink_count(25)
     end
 
     def part_two(input)
       stones = StoneFactory.new(input.first).create!
-      stones.blink(35).size
+      stones.blink_count(75)
     end
   end
 end

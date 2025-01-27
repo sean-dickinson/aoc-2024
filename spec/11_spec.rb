@@ -1,5 +1,4 @@
 require "./11"
-require "benchmark"
 RSpec.describe Day11 do
   describe Day11::StoneCollection do
     describe "#size" do
@@ -42,16 +41,6 @@ RSpec.describe Day11 do
             expect(stone.blink).to eq Day11::Stone.new(3 * 2024)
           end
         end
-        context "multiple blinks" do
-          it "returns the correct stone for the second blink" do
-            stone = Day11::Stone.new(0)
-            expect(stone.blink(2)).to eq Day11::Stone.new(2024)
-          end
-          it "returns the correct stone for the third blink" do
-            stone = Day11::Stone.new(0)
-            expect(stone.blink(3)).to eq Day11::StoneCollection.from_numbers([20, 24])
-          end
-        end
       end
 
       context "multiple stones" do
@@ -75,18 +64,21 @@ RSpec.describe Day11 do
     it "returns the correct answer for the first blink" do
       stones = Day11::StoneCollection.from_numbers([125, 17])
       expect(stones.blink).to eq Day11::StoneCollection.from_numbers([253000, 1, 7])
+      expect(stones.blink_count).to eq 3
     end
 
     it "returns the correct answer for the second blink" do
       stones = Day11::StoneCollection.from_numbers([125, 17])
 
-      expect(stones.blink(2)).to eq Day11::StoneCollection.from_numbers([253, 0, 2024, 14168])
+      expect(stones.blink.blink).to eq Day11::StoneCollection.from_numbers([253, 0, 2024, 14168])
+      expect(stones.blink_count(2)).to eq 4
     end
 
     it "returns the correct answer for the 3rd blink" do
       stones = Day11::StoneCollection.from_numbers([125, 17])
 
-      expect(stones.blink(3)).to eq Day11::StoneCollection.from_numbers([512072, 1, 20, 24, 28676032])
+      expect(stones.blink.blink.blink).to eq Day11::StoneCollection.from_numbers([512072, 1, 20, 24, 28676032])
+      expect(stones.blink_count(3)).to eq 5
     end
   end
 
